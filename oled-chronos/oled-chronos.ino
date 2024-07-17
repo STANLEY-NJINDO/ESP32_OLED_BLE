@@ -48,64 +48,6 @@ int scroll = 0, bat = 0, lines = 0, msglen = 0, msgIndex = 0;
 char msg[126];
 String msg0, msg1, msg2, msg3, msg4, msg5;
 
-volatile bool buttonPressed = false;
-
-void IRAM_ATTR buttonISR()
-{
-  buttonPressed = true;
-}
-
-uint32_t appColor(int app)
-{
-  switch (app)
-  {
-  case 0x03:
-    return GREEN; //"Message";
-  case 0x04:
-    return CYAN; //"Mail";
-  case 0x07:
-    return BLUE; //"Tencent";
-  case 0x08:
-    return BLUE; //"Skype";
-  case 0x09:
-    return GREEN; //"Wechat";
-  case 0x0A:
-    return GREEN; //"WhatsApp";
-  case 0x0B:
-    return RED; // "Gmail";
-  case 0x0E:
-    return YELLOW; //"Line";
-  case 0x0F:
-    return CYAN; //"Twitter";
-  case 0x10:
-    return BLUE; //"Facebook";
-  case 0x11:
-    return BLUE; // "Messenger";
-  case 0x12:
-    return RED; //"Instagram";
-  case 0x13:
-    return RED; //"Weibo";
-  case 0x14:
-    return YELLOW; //"KakaoTalk";
-  case 0x16:
-    return PURPLE; //"Viber";
-  case 0x17:
-    return BLUE; //"Vkontakte";
-  case 0x18:
-    return CYAN; //"Telegram";
-  case 0x1B:
-    return BLUE; //"DingTalk";
-  case 0x20:
-    return GREEN; // "WhatsApp Business";
-  case 0x22:
-    return WHITE; //"WearFit Pro";
-  case 0xC0:
-    return PINK; //"ChronosESP32";
-  default:
-    return GREEN; //"Message";
-  }
-  return GREEN;
-}
 
 void notificationCallback(Notification notification)
 {
@@ -122,10 +64,7 @@ void notificationCallback(Notification notification)
 
   notify.time = millis();
   notify.active = true;
-  ws2812fx.setMode(FX_MODE_BLINK);
-  ws2812fx.setColor(appColor(notification.icon));
-  ws2812fx.setBrightness(100);
-  ws2812fx.setSpeed(500);
+  
 }
 
 void ringerCallback(String caller, bool state)
@@ -137,15 +76,12 @@ void ringerCallback(String caller, bool state)
     Serial.println(caller);
     msg0 = caller;
 
-    ws2812fx.setMode(FX_MODE_TWINKLE_FADE_RANDOM);
-    ws2812fx.setBrightness(200);
-    ws2812fx.setSpeed(200);
+   
   }
   else
   {
     Serial.println("Ringer dismissed");
-    ws2812fx.setBrightness(0);
-  }
+     }
 }
 
 void rawCallback(uint8_t *data, int length)
@@ -205,25 +141,17 @@ void setup()
   watch.set24Hour(true);
   watch.setBattery(80);
 
-  ws2812fx.init();
-  ws2812fx.setBrightness(0);
-  ws2812fx.setSpeed(500);
-  ws2812fx.setColor(0x007BFF);
-  ws2812fx.setMode(FX_MODE_STATIC);
-  ws2812fx.start();
+  
 
-  attachInterrupt(BUTTON_PIN, buttonISR, FALLING);
+
 }
 
 void loop()
 {
 
   watch.loop();
-  ws2812fx.service();
+ 
 
-  if (buttonPressed)
-  {
-    buttonPressed = false;
 
     int c = watch.getNotificationCount();
     if (c == 0)
@@ -255,8 +183,7 @@ void loop()
       notify.time = millis();
       notify.active = true;
     }
-  }
-  myOLED.clrScr();
+    myOLED.clrScr();
 
   digitalWrite(BUILTINLED, watch.isConnected());
 
@@ -274,7 +201,7 @@ void loop()
         // timer end
         notify.active = false;
         msgIndex = 0;
-        ws2812fx.setBrightness(0);
+      
       }
       showNotification();
     }
